@@ -5,7 +5,7 @@
 
 TINY_SIZE=512
 SMALL_SIZE=100M
-BIG_SIZE=1G
+BIG_SIZE=10G
 
 REPEAT=1
 
@@ -99,10 +99,12 @@ write_test $REPEAT latency.sync.direct $TINY_SIZE 1000  "conv=fdatasync oflag=di
 
 # Lendo arquivos pequenos
 dd if=/dev/zero of=${OUTPUT_FILE} bs=$SMALL_SIZE count=1 > /dev/null 2>&1
-# 1k
-read_test $REPEAT read.small.1k 1k ${OUTPUT_FILE}
 # 4k
 read_test $REPEAT read.small.4k 4k ${OUTPUT_FILE}
+# 8k
+read_test $REPEAT read.small.8k 8k ${OUTPUT_FILE}
+#16k
+read_test $REPEAT read.small.16k 16k ${OUTPUT_FILE}
 # 32k
 read_test $REPEAT read.small.32k 32k ${OUTPUT_FILE}
 # 64k
@@ -114,10 +116,12 @@ rm ${OUTPUT_FILE}
 
 # Lendo arquivos grandes
 dd if=/dev/zero of=${OUTPUT_FILE} bs=$BIG_SIZE count=1 > /dev/null 2>&1
-# 1k
-read_test $REPEAT read.big.1k 1k ${OUTPUT_FILE}
 # 4k
 read_test $REPEAT read.big.4k 4k ${OUTPUT_FILE}
+# 8k
+read_test $REPEAT read.big.8k 8k ${OUTPUT_FILE}
+# 16k
+read_test $REPEAT read.big.16k 16k ${OUTPUT_FILE}
 # 32k
 read_test $REPEAT read.big.32k 32k ${OUTPUT_FILE}
 # 64k
