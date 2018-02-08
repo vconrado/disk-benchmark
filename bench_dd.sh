@@ -27,7 +27,7 @@ fi
 
 OUTPUT_FILE="${OUTPUT_DIR}/tempfile"
 
-function test(){
+function write_test(){
 	REPEAT=$1
   	TEST_NAME=$2
 	BS=$3
@@ -53,27 +53,76 @@ function test(){
 }
 
 
+function read_test(){
+	REPEAT=$1
+  	TEST_NAME=$2
+	BS=$3
+	FILE=$4
+	OPTS_F=""
+
+	CMD="dd of=/dev/null if=${FILE} bs=$BS"
+	for i in $(seq 1 $REPEAT); do
+		#echo $CMD
+		RESULT=$($CMD 2>&1 | tail -n 1)
+		#echo $RESULT
+		PARSED=$(echo $RESULT | awk 'BEGIN { FS = ",";OFS = ", " } ; { print $3, $4 }')
+		echo "$TEST_NAME, $BS, $COUNT, $OPTS_F,$PARSED"
+ 	done 
+}
+
+
+
 ####################################################################
 # Throughput (Streaming I/O)
 
 # Com Cache
-test $REPEAT throughput.cached.small $SMALL_SIZE 1 ""
+write_test $REPEAT throughput.cached.small $SMALL_SIZE 1 ""
 # Sincroniza antes de terminar
-test $REPEAT throughput.sync.small $SMALL_SIZE 1 "conv=fdatasync"
+write_test $REPEAT throughput.sync.small $SMALL_SIZE 1 "conv=fdatasync"
 # Sem cache e I/O direto (by-pass fs)
-test $REPEAT thoughput.sync.direct.small $SMALL_SIZE 1 "conv=fdatasync oflag=direct"
+write_test $REPEAT thoughput.sync.direct.small $SMALL_SIZE 1 "conv=fdatasync oflag=direct"
 
 # BIG FILES
 # Com Cache
-test $REPEAT throughput.cached.big $BIG_SIZE 1 ""
+write_test $REPEAT throughput.cached.big $BIG_SIZE 1 ""
 # Sincroniza antes de terminar
-test $REPEAT throughput.sync.big $BIG_SIZE 1 "conv=fdatasync"
+write_test $REPEAT throughput.sync.big $BIG_SIZE 1 "conv=fdatasync"
 # Sem cache e I/O direto (by-pass fs)
-test $REPEAT thoughput.sync.direct.small $BIG_SIZE 1 "conv=fdatasync oflag=direct"
+write_test $REPEAT thoughput.sync.direct.small $BIG_SIZE 1 "conv=fdatasync oflag=direct"
  
 
 ####################################################################
 # Latency
-test $REPEAT latency.cache $TINY_SIZE 1000 
-test $REPEAT latency.sync $TINY_SIZE 1000  "conv=fdatasync"
-test $REPEAT latency.sync.direct $TINY_SIZE 1000  "conv=fdatasync oflag=direct"
+write_test $REPEAT latency.cache $TINY_SIZE 1000 
+write_test $REPEAT latency.sync $TINY_SIZE 1000  "conv=fdatasync"
+write_test $REPEAT latency.sync.direct $TINY_SIZE 1000  "conv=fdatasync oflag=direct"
+
+# Lendo arquivos pequenos
+dd if=/dev/zero of=${OUTPUT_FILE} bs=$SMALL_SIZE count=1 > /dev/null 2>&1
+# 1k
+read_test $REPEAT read.small.1k 1k ${OUTPUT_FILE}
+# 4k
+read_test $REPEAT read.small.4k 4k ${OUTPUT_FILE}
+# 32k
+read_test $REPEAT read.small.32k 32k ${OUTPUT_FILE}
+# 64k
+read_test $REPEAT read.small.64k 64k ${OUTPUT_FILE}
+# 128k
+read_test $REPEAT read.small.128k 128k ${OUTPUT_FILE}
+
+rm ${OUTPUT_FILE}
+
+# Lendo arquivos grandes
+dd if=/dev/zero of=${OUTPUT_FILE} bs=$BIG_SIZE count=1 > /dev/null 2>&1
+# 1k
+read_test $REPEAT read.big.1k 1k ${OUTPUT_FILE}
+# 4k
+read_test $REPEAT read.big.4k 4k ${OUTPUT_FILE}
+# 32k
+read_test $REPEAT read.big.32k 32k ${OUTPUT_FILE}
+# 64k
+read_test $REPEAT read.big.64k 64k ${OUTPUT_FILE}
+# 128k
+read_test $REPEAT read.big.128k 128k ${OUTPUT_FILE}
+
+rm ${OUTPUT_FILE}
