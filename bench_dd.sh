@@ -5,7 +5,7 @@
 
 TINY_SIZE=512
 SMALL_SIZE=100M
-BIG_SIZE=1G
+BIG_SIZE=10G
 
 REPEAT=1
 
@@ -21,15 +21,15 @@ else
 fi
 
 if [ ! -d $OUTPUT_DIR ]; then
-        echo "'$OUTPUT_DIR' is an invalid directory"
-        exit
+  echo "'$OUTPUT_DIR' is an invalid directory"
+  exit
 fi
 
 OUTPUT_FILE="${OUTPUT_DIR}/tempfile"
 
 function write_test(){
 	REPEAT=$1
-  	TEST_NAME=$2
+  TEST_NAME=$2
 	BS=$3
 	COUNT=$4
 	OPTS=$5
@@ -55,7 +55,7 @@ function write_test(){
 
 function read_test(){
 	REPEAT=$1
-  	TEST_NAME=$2
+  TEST_NAME=$2
 	BS=$3
 	FILE=$4
 	OPTS_F=""
@@ -89,7 +89,6 @@ write_test $REPEAT throughput.cached.big $BIG_SIZE 1 ""
 write_test $REPEAT throughput.sync.big $BIG_SIZE 1 "conv=fdatasync"
 # Sem cache e I/O direto (by-pass fs)
 write_test $REPEAT thoughput.sync.direct.small $BIG_SIZE 1 "conv=fdatasync oflag=direct"
- 
 
 ####################################################################
 # Latency
@@ -99,10 +98,12 @@ write_test $REPEAT latency.sync.direct $TINY_SIZE 1000  "conv=fdatasync oflag=di
 
 # Lendo arquivos pequenos
 dd if=/dev/zero of=${OUTPUT_FILE} bs=$SMALL_SIZE count=1 > /dev/null 2>&1
-# 1k
-read_test $REPEAT read.small.1k 1k ${OUTPUT_FILE}
 # 4k
 read_test $REPEAT read.small.4k 4k ${OUTPUT_FILE}
+# 8k
+read_test $REPEAT read.small.8k 8k ${OUTPUT_FILE}
+# 16k
+read_test $REPEAT read.small.16k 16k ${OUTPUT_FILE}
 # 32k
 read_test $REPEAT read.small.32k 32k ${OUTPUT_FILE}
 # 64k
@@ -114,10 +115,12 @@ rm ${OUTPUT_FILE}
 
 # Lendo arquivos grandes
 dd if=/dev/zero of=${OUTPUT_FILE} bs=$BIG_SIZE count=1 > /dev/null 2>&1
-# 1k
-read_test $REPEAT read.big.1k 1k ${OUTPUT_FILE}
 # 4k
 read_test $REPEAT read.big.4k 4k ${OUTPUT_FILE}
+# 8k
+read_test $REPEAT read.big.8k 8k ${OUTPUT_FILE}
+# 16k
+read_test $REPEAT read.big.16k 16k ${OUTPUT_FILE}
 # 32k
 read_test $REPEAT read.big.32k 32k ${OUTPUT_FILE}
 # 64k

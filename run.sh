@@ -22,5 +22,5 @@ if [ ! -d $2 ]; then
 	exit 3
 fi
 
-$DIR/bench_dd.sh $1 $2 >> ${HN}.dd.stats.${DATE}.csv
-$DIR/bench_bonnie.sh $1 $2 >> ${HN}.bonnie.stats.${DATE}
+@$DIR/bench_dd.sh $1 $2 >> ${HN}.dd.stats.${DATE}.csv
+$DIR/bench_bonnie.sh $1 $2 >> ${HN}.bonnie.stats.${DATE}.csv

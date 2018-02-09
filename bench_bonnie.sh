@@ -24,6 +24,6 @@ N=10
 SIZE=2
 
 CMD="bonnie -d $OUTPUT_DIR -x $REPEAT"
-echo $CMD
+#echo $CMD
 $CMD
 
